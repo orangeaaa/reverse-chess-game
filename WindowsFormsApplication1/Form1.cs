@@ -137,7 +137,8 @@ namespace WindowsFormsApplication1
             {
                 for(int j = 0; j < N; j++)
                 {
-                    cnt[status[i, j]]++;
+                    if (status[i, j] == 0) cnt[0]++;
+                    else if (status[i, j] == 1) cnt[1]++;
                 }
             }
             MessageBox.Show("Black: " + cnt[0] + "\nWhite: " + cnt[1]);
