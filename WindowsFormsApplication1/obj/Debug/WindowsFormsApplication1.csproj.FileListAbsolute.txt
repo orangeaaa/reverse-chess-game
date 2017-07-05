@@ -7,3 +7,6 @@ c:\users\kevin\documents\visual studio 2015\Projects\WindowsFormsApplication1\Wi
 c:\users\kevin\documents\visual studio 2015\Projects\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csproj.GenerateResource.Cache
 c:\users\kevin\documents\visual studio 2015\Projects\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.exe
 c:\users\kevin\documents\visual studio 2015\Projects\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.pdb
+C:\Users\kevin\Source\Repos\reverse-chess-game\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe.config
+C:\Users\kevin\Source\Repos\reverse-chess-game\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.exe
+C:\Users\kevin\Source\Repos\reverse-chess-game\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.pdb
