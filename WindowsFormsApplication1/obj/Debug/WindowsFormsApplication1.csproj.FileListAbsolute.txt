@@ -12,3 +12,10 @@ C:\Users\kevin\Source\Repos\reverse-chess-game\WindowsFormsApplication1\obj\Debu
 C:\Users\kevin\Source\Repos\reverse-chess-game\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.pdb
 C:\Users\drels\Source\Repos\reverse-chess-game\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.exe
 C:\Users\drels\Source\Repos\reverse-chess-game\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.pdb
+C:\Users\drels\Source\Repos\reverse-chess-game\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe.config
+C:\Users\drels\Source\Repos\reverse-chess-game\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe
+C:\Users\drels\Source\Repos\reverse-chess-game\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.pdb
+C:\Users\drels\Source\Repos\reverse-chess-game\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csprojResolveAssemblyReference.cache
+C:\Users\drels\Source\Repos\reverse-chess-game\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Form1.resources
+C:\Users\drels\Source\Repos\reverse-chess-game\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Properties.Resources.resources
+C:\Users\drels\Source\Repos\reverse-chess-game\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csproj.GenerateResource.Cache
