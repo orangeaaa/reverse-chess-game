@@ -15,13 +15,10 @@ namespace WindowsFormsApplication1
         public Form1()
         {
             InitializeComponent();
-           
-
+            btn = new Button[board.N, board.N];
         }
-        private const int N = 8;
-        private int player = 0;
-        private int[,] status = new int[N, N];
-        private Button[,] btn = new Button[N, N];
+        reversi_board board = new reversi_board();
+        private Button[,] btn;
 
         private int square_size = 60;
         private int margin = 50;
@@ -31,14 +28,14 @@ namespace WindowsFormsApplication1
             
             BackColor = Color.White;
             Text = "Reversi";
-            Size size = new Size(margin * 2 + square_size * N, margin * 2 + square_size * N);
+            Size size = new Size(margin * 2 + square_size * board.N, margin * 2 + square_size * board.N);
             this.Size = size;
 
-            status_initialize();
+            board.game_start();
 
-            for (int i = 0; i < N; i++)
+            for (int i = 0; i < board.N; i++)
             {
-                for (int j = 0; j < N; j++)
+                for (int j = 0; j < board.N; j++)
                 {
                     btn[i, j] = new Button();
                     btn[i, j].Location = new Point(margin + i * square_size, margin + j * square_size);
@@ -50,24 +47,13 @@ namespace WindowsFormsApplication1
                 }
             }
 
-            find_valid_place(player);
+            ready_for_next_play();
 
         }
 
-        void status_initialize() {
-            for(int i = 0; i < N; i++)
-            {
-                for(int j = 0; j < N; j++)
-                {
-                    status[i, j] = -1;
-                }
-            }
-            status[3, 4] = status[4, 3] = 0;
-            status[3, 3] = status[4, 4] = 1;
-        }
         void update_btn(int x, int y, bool can_click = false)
         {
-            switch (status[x, y])
+            switch (board.status[x, y])
             {
                 case -1:
                     if (can_click)
@@ -87,23 +73,20 @@ namespace WindowsFormsApplication1
             }
         }
 
-        int find_valid_place(int pl)
-        {
-            int validCount = 0;
-            for(int i = 0; i < N; i++)
-            {
-                for(int j = 0; j < N; j++)
-                {
-                    if (place(i, j, pl))
-                    {
-                        update_btn(i, j, true);
-                        validCount++;
-                    }
-                    else update_btn(i, j);
+        void update_all_buttons() {
+            for(int i = 0; i < board.N; i++) {
+                for(int j = 0; j < board.N; j++) {
+                    update_btn(i, j);
                 }
             }
+            foreach(var choice in board.cur_valid_places) {
+                update_btn(choice.Item1, choice.Item2, true);
+            }
+        }
 
-            return validCount;
+        void ready_for_next_play() {
+            board.find_valid_place(board.player);
+            update_all_buttons();
         }
 
         void btn_Click(object sender,EventArgs e)
@@ -116,236 +99,18 @@ namespace WindowsFormsApplication1
 
             //MessageBox.Show("x="+x+"\ny="+y);
 
-            place(x, y, player, true);
+            board.make_move(x, y);
+            ready_for_next_play();
 
-            // Change player
-            player = next_player(player);
-            int pass_count = 0;
-            while (find_valid_place(player) == 0 && pass_count < 2)
-            {
-                pass_count++;
-                player = next_player(player);
-            }
-            if (pass_count == 2)
+            if (board.game_phase == 2) {
                 game_over();
+            }
         }
 
         void game_over()
         {
-            int[] cnt = new int[2];
-            for(int i = 0; i < N; i++)
-            {
-                for(int j = 0; j < N; j++)
-                {
-                    if (status[i, j] == 0) cnt[0]++;
-                    else if (status[i, j] == 1) cnt[1]++;
-                }
-            }
-            MessageBox.Show("Black: " + cnt[0] + "\nWhite: " + cnt[1]);
+            MessageBox.Show("Black: " + board.cnt[0] + "\nWhite: " + board.cnt[1]);
         }
-
-        int next_player(int pl) { return (pl + 1) % 2; }
-
-        bool place(int x, int y, int pl, bool real_move = false)
-        {
-            if (status[x, y] != -1) return false;
-
-            bool isValid = false;
-            int validCount;
-
-            validCount = 0;
-            for(int i = x + 1; i < N; i++) // R
-            {
-                if (status[i, y] == pl) { validCount = i - x - 1; break; }
-                else if (status[i, y] == -1) { validCount = 0; break; }
-            }
-            if (validCount > 0)
-            {
-                isValid = true;
-                if (real_move)
-                {
-                    for (int i = x; i < N; i++)
-                    {
-                        if (status[i, y] == pl) break;
-                        else
-                        {
-                            status[i, y] = pl;
-                            update_btn(i, y);
-                        }
-                    }
-                }
-            }
-
-            validCount = 0;
-            for (int i = x + 1, j = y + 1; i < N && j < N; i++, j++) // BR
-            {
-                if (status[i, j] == pl) { validCount = i - x - 1; break; }
-                else if (status[i, j] == -1) { validCount = 0; break; }
-            }
-            if (validCount > 0)
-            {
-                isValid = true;
-                if (real_move)
-                {
-                    for (int i = x + 1, j = y + 1; i < N && j < N; i++, j++)
-                    {
-                        if (status[i, j] == pl) break;
-                        else
-                        {
-                            status[i, j] = pl;
-                            update_btn(i, j);
-                        }
-                    }
-                }
-            }
-
-            validCount = 0;
-            for (int j = y + 1; j < N; j++) // B
-            {
-                if (status[x, j] == pl) { validCount = j - y - 1; break; }
-                else if (status[x, j] == -1) { validCount = 0; break; }
-            }
-            if (validCount > 0)
-            {
-                isValid = true;
-                if (real_move)
-                {
-                    for (int j = y + 1; j < N; j++)
-                    {
-                        if (status[x, j] == pl) break;
-                        else
-                        {
-                            status[x, j] = pl;
-                            update_btn(x, j);
-                        }
-                    }
-                }
-            }
-
-            validCount = 0;
-            for (int i = x - 1, j = y + 1; i >= 0 && j < N; i--, j++) // BL
-            {
-                if (status[i, j] == pl) { validCount = x - i - 1; break; }
-                else if (status[i, j] == -1) { validCount = 0; break; }
-            }
-            if (validCount > 0)
-            {
-                isValid = true;
-                if (real_move)
-                {
-                    for (int i = x - 1, j = y + 1; i >= 0 && j < N; i--, j++)
-                    {
-                        if (status[i, j] == pl) break;
-                        else
-                        {
-                            status[i, j] = pl;
-                            update_btn(i, j);
-                        }
-                    }
-                }
-            }
-
-            validCount = 0;
-            for (int i = x - 1; i >= 0; i--) // L
-            {
-                if (status[i, y] == pl) { validCount = x - i - 1; break; }
-                else if (status[i, y] == -1) { validCount = 0; break; }
-            }
-            if (validCount > 0)
-            {
-                isValid = true;
-                if (real_move)
-                {
-                    for (int i = x - 1; i >= 0; i--)
-                    {
-                        if (status[i, y] == pl) break;
-                        else
-                        {
-                            status[i, y] = pl;
-                            update_btn(i, y);
-                        }
-                    }
-                }
-            }
-
-            validCount = 0;
-            for (int i = x - 1, j = y - 1; i >= 0 && j >= 0; i--, j--) // UL
-            {
-                if (status[i, j] == pl) { validCount = x - i - 1; break; }
-                else if (status[i, j] == -1) { validCount = 0; break; }
-            }
-            if (validCount > 0)
-            {
-                isValid = true;
-                if (real_move)
-                {
-                    for (int i = x - 1, j = y - 1; i >= 0 && j >= 0; i--, j--)
-                    {
-                        if (status[i, j] == pl) break;
-                        else
-                        {
-                            status[i, j] = pl;
-                            update_btn(i, j);
-                        }
-                    }
-                }
-            }
-
-            validCount = 0;
-            for (int j = y - 1; j >= 0; j--) // U
-            {
-                if (status[x, j] == pl) { validCount = y - j - 1; break; }
-                else if (status[x, j] == -1) { validCount = 0; break; }
-            }
-            if (validCount > 0)
-            {
-                isValid = true;
-                if (real_move)
-                {
-                    for (int j = y - 1; j >= 0; j--)
-                    {
-                        if (status[x, j] == pl) break;
-                        else
-                        {
-                            status[x, j] = pl;
-                            update_btn(x, j);
-                        }
-                    }
-                }
-            }
-
-            validCount = 0;
-            for (int i = x + 1, j = y - 1; i < N && j >= 0; i++, j--) // UR
-            {
-                if (status[i, j] == pl) { validCount = i - x - 1; break; }
-                else if (status[i, j] == -1) { validCount = 0; break; }
-            }
-            if (validCount > 0)
-            {
-                isValid = true;
-                if (real_move)
-                {
-                    for (int i = x + 1, j = y - 1; i < N && j >= 0; i++, j--)
-                    {
-                        if (status[i, j] == pl) break;
-                        else
-                        {
-                            status[i, j] = pl;
-                            update_btn(i, j);
-                        }
-                    }
-                }
-            }
-
-            if(isValid && real_move)
-            {
-                status[x, y] = pl;
-                update_btn(x, y);
-            }
-
-            return isValid;
-        }
-
         
     }
 }
