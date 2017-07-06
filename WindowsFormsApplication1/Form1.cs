@@ -38,6 +38,8 @@ namespace ReversiClient
 
         void init_display_menu() {
             this.ClientSize = new Size(400, 400);
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             CenterToScreen();
 
             menu_btn_single = new Button();
@@ -73,6 +75,8 @@ namespace ReversiClient
         void init_display_board() {
             Size size = new Size(margin * 2 + square_size * board.N, margin * 2 + square_size * board.N);
             this.ClientSize = size;
+            this.FormBorderStyle = FormBorderStyle.Sizable;
+            this.MaximizeBox = true;
             CenterToScreen();
 
             for (int i = 0; i < board.N; i++) {
