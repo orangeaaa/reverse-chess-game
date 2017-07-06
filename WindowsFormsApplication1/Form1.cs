@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace WindowsFormsApplication1
+namespace ReversiClient
 {
     public partial class Form1 : Form
     {
@@ -16,8 +16,10 @@ namespace WindowsFormsApplication1
         {
             InitializeComponent();
             btn = new Button[board.N, board.N];
+            gameNet = new comm();
         }
         reversi_board board = new reversi_board();
+        comm gameNet;
         private Button[,] btn;
 
         private int square_size = 60;
