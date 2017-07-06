@@ -20,12 +20,15 @@ namespace ReversiClient {
         public comm() {
             bcn_tm.Elapsed += new ElapsedEventHandler(beaconEvent);
             bcn_tm.Interval = 1000;
-            bcn_tm.Enabled = true;
+            bcn_tm.Enabled = false;
         }
         public void Dispose() {
             cli.Close();
         }
 
+        public void send_beacon(bool send = true) {
+            bcn_tm.Enabled = send;
+        }
         void beaconEvent(object source, ElapsedEventArgs e) {
             byte[] bytes = Encoding.ASCII.GetBytes("ReversiClient");
             cli.Send(bytes, bytes.Length, bcn_ip);

@@ -21,6 +21,9 @@ namespace ReversiClient
         reversi_board board = new reversi_board();
         comm gameNet;
         private Button[,] btn;
+        Button menu_btn_single,
+            menu_btn_create_lobby,
+            menu_btn_find_lobby;
 
         private int square_size = 60;
         private int margin = 50;
@@ -28,16 +31,46 @@ namespace ReversiClient
         private void Form1_Load(object sender, EventArgs e)
         {
             Text = "Reversi";
+            BackColor = Color.White;
 
-            init_display_board();
+            init_display_menu();
+        }
 
-            board.game_start();
-            ready_for_next_play();
+        void init_display_menu() {
+            this.ClientSize = new Size(400, 400);
+            CenterToScreen();
 
+            menu_btn_single = new Button();
+            menu_btn_single.Location = new Point(50, 50);
+            menu_btn_single.Size = new Size(300, 100);
+            menu_btn_single.Text = "Single Player";
+            menu_btn_single.Click += menu_btn_single_Click;
+            this.Controls.Add(menu_btn_single);
+
+            menu_btn_create_lobby = new Button();
+            menu_btn_create_lobby.Location = new Point(50, 150);
+            menu_btn_create_lobby.Size = new Size(300, 100);
+            menu_btn_create_lobby.Text = "Create Lobby";
+            menu_btn_create_lobby.Click += menu_btn_create_lobby_Click;
+            this.Controls.Add(menu_btn_create_lobby);
+
+            menu_btn_find_lobby = new Button();
+            menu_btn_find_lobby.Location = new Point(50, 250);
+            menu_btn_find_lobby.Size = new Size(300, 100);
+            menu_btn_find_lobby.Text = "Find Lobby";
+            this.Controls.Add(menu_btn_find_lobby);
+
+        }
+        void destroy_display_menu() {
+            this.Controls.Remove(menu_btn_single);
+            menu_btn_single.Dispose();
+            this.Controls.Remove(menu_btn_create_lobby);
+            menu_btn_create_lobby.Dispose();
+            this.Controls.Remove(menu_btn_find_lobby);
+            menu_btn_find_lobby.Dispose();
         }
 
         void init_display_board() {
-            BackColor = Color.White;
             Size size = new Size(margin * 2 + square_size * board.N, margin * 2 + square_size * board.N);
             this.ClientSize = size;
             CenterToScreen();
@@ -51,6 +84,14 @@ namespace ReversiClient
                     btn[i, j].Name = (i * 100 + j).ToString();
                     this.Controls.Add(btn[i, j]);
                     btn[i, j].Click += btn_Click;
+                }
+            }
+        }
+        void destroy_display_board() {
+            for (int i = 0; i < board.N; i++) {
+                for (int j = 0; j < board.N; j++) {
+                    this.Controls.Remove(btn[i, j]);
+                    btn[i, j].Dispose();
                 }
             }
         }
@@ -95,6 +136,17 @@ namespace ReversiClient
             if (board.game_phase == 2) { // End of game
                 game_over();
             }
+        }
+
+        void menu_btn_single_Click(object sender, EventArgs e) {
+            destroy_display_menu();
+            init_display_board();
+            board.game_start();
+            ready_for_next_play();
+        }
+        void menu_btn_create_lobby_Click(object sender, EventArgs e) {
+            destroy_display_menu();
+            gameNet.send_beacon();
         }
 
         void btn_Click(object sender,EventArgs e)
