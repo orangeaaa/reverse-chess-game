@@ -25,18 +25,23 @@ namespace WindowsFormsApplication1
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            
-            BackColor = Color.White;
             Text = "Reversi";
-            Size size = new Size(margin * 2 + square_size * board.N, margin * 2 + square_size * board.N);
-            this.Size = size;
+
+            init_display_board();
 
             board.game_start();
+            ready_for_next_play();
 
-            for (int i = 0; i < board.N; i++)
-            {
-                for (int j = 0; j < board.N; j++)
-                {
+        }
+
+        void init_display_board() {
+            BackColor = Color.White;
+            Size size = new Size(margin * 2 + square_size * board.N, margin * 2 + square_size * board.N);
+            this.ClientSize = size;
+            CenterToScreen();
+
+            for (int i = 0; i < board.N; i++) {
+                for (int j = 0; j < board.N; j++) {
                     btn[i, j] = new Button();
                     btn[i, j].Location = new Point(margin + i * square_size, margin + j * square_size);
                     btn[i, j].Size = new Size(square_size, square_size);
@@ -46,9 +51,6 @@ namespace WindowsFormsApplication1
                     btn[i, j].Click += btn_Click;
                 }
             }
-
-            ready_for_next_play();
-
         }
 
         void update_btn(int x, int y, bool can_click = false)
@@ -87,6 +89,10 @@ namespace WindowsFormsApplication1
         void ready_for_next_play() {
             board.find_valid_place(board.player);
             update_all_buttons();
+
+            if (board.game_phase == 2) { // End of game
+                game_over();
+            }
         }
 
         void btn_Click(object sender,EventArgs e)
@@ -101,10 +107,6 @@ namespace WindowsFormsApplication1
 
             board.make_move(x, y);
             ready_for_next_play();
-
-            if (board.game_phase == 2) {
-                game_over();
-            }
         }
 
         void game_over()
