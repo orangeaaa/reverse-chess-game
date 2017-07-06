@@ -32,6 +32,10 @@ namespace ReversiClient
         Label waiting_conn;
         Button cancel_waiting_conn;
         PictureBox pic_waiting_conn;
+        // finding lobby
+        ListBox lobby_list;
+        Button cancel_finding_lobby,
+            btn_join_lobby;
 
         private int square_size = 60;
         private int margin = 50;
@@ -68,6 +72,7 @@ namespace ReversiClient
             menu_btn_find_lobby.Location = new Point(50, 250);
             menu_btn_find_lobby.Size = new Size(300, 100);
             menu_btn_find_lobby.Text = "Find Lobby";
+            menu_btn_find_lobby.Click += menu_btn_find_lobby_Click;
             this.Controls.Add(menu_btn_find_lobby);
 
         }
@@ -116,6 +121,23 @@ namespace ReversiClient
             cancel_waiting_conn.Dispose();
             this.Controls.Remove(pic_waiting_conn);
             pic_waiting_conn.Dispose();
+        }
+
+        void init_display_findLobby() {
+            lobby_list = new ListBox() {
+                Location = new Point(50, 50),
+                Size = new Size(300, 200),
+                SelectionMode = SelectionMode.One
+            };
+            this.Controls.Add(lobby_list);
+        }
+        void destroy_display_findLobby() {
+            this.Controls.Remove(lobby_list);
+            lobby_list.Dispose();
+            this.Controls.Remove(cancel_finding_lobby);
+            cancel_finding_lobby.Dispose();
+            this.Controls.Remove(btn_join_lobby);
+            btn_join_lobby.Dispose();
         }
 
         void init_display_board() {
@@ -198,6 +220,10 @@ namespace ReversiClient
             destroy_display_menu();
             gameNet.send_beacon();
             init_display_waitConn();
+        }
+        void menu_btn_find_lobby_Click(object sender, EventArgs e) {
+            destroy_display_menu();
+            init_display_findLobby();
         }
 
         void btn_cancel_wait_conn_Click(object sender, EventArgs e) {
