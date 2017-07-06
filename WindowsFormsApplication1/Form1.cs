@@ -20,10 +20,18 @@ namespace ReversiClient
         }
         reversi_board board = new reversi_board();
         comm gameNet;
+
+        // Resources on the form
+        // board
         private Button[,] btn;
+        // menu
         Button menu_btn_single,
             menu_btn_create_lobby,
             menu_btn_find_lobby;
+        // waiting for connection
+        Label waiting_conn;
+        Button cancel_waiting_conn;
+        PictureBox pic_waiting_conn;
 
         private int square_size = 60;
         private int margin = 50;
@@ -70,6 +78,44 @@ namespace ReversiClient
             menu_btn_create_lobby.Dispose();
             this.Controls.Remove(menu_btn_find_lobby);
             menu_btn_find_lobby.Dispose();
+        }
+
+        void init_display_waitConn() {
+            // retain menu window settings
+
+            waiting_conn = new Label() {
+                Location = new Point(0, 200),
+                Size = new Size(400, 50),
+                Text = "Waiting for a rival...",
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+            this.Controls.Add(waiting_conn);
+
+            cancel_waiting_conn = new Button() {
+                Location = new Point(50, 300),
+                Size = new Size(300, 50),
+                Text = "Cancel"
+            };
+            cancel_waiting_conn.Click += btn_cancel_wait_conn_Click;
+            this.Controls.Add(cancel_waiting_conn);
+
+            var thisExe = System.Reflection.Assembly.GetExecutingAssembly();
+            var file = thisExe.GetManifestResourceStream("ReversiClient.w8loader.gif");
+            pic_waiting_conn = new PictureBox() {
+                Location = new Point(175, 150),
+                Size = new Size(50, 50),
+                Image = Image.FromStream(file)
+            };
+            this.Controls.Add(pic_waiting_conn);
+        }
+
+        void destroy_display_waitConn() {
+            this.Controls.Remove(waiting_conn);
+            waiting_conn.Dispose();
+            this.Controls.Remove(cancel_waiting_conn);
+            cancel_waiting_conn.Dispose();
+            this.Controls.Remove(pic_waiting_conn);
+            pic_waiting_conn.Dispose();
         }
 
         void init_display_board() {
@@ -151,6 +197,13 @@ namespace ReversiClient
         void menu_btn_create_lobby_Click(object sender, EventArgs e) {
             destroy_display_menu();
             gameNet.send_beacon();
+            init_display_waitConn();
+        }
+
+        void btn_cancel_wait_conn_Click(object sender, EventArgs e) {
+            destroy_display_waitConn();
+            gameNet.send_beacon(false);
+            init_display_menu();
         }
 
         void btn_Click(object sender,EventArgs e)
