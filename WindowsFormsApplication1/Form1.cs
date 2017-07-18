@@ -130,6 +130,20 @@ namespace ReversiClient
                 SelectionMode = SelectionMode.One
             };
             this.Controls.Add(lobby_list);
+            cancel_finding_lobby = new Button() {
+                Location = new Point(50, 300),
+                Size = new Size(300, 50),
+                Text = "Cancel"
+            };
+            cancel_finding_lobby.Click += btn_cancel_find_lobby_Click;
+            this.Controls.Add(cancel_finding_lobby);
+            btn_join_lobby = new Button() {
+                Location = new Point(50, 250),
+                Size = new Size(300, 50),
+                Text = "Join",
+                Enabled = false
+            };
+            this.Controls.Add(btn_join_lobby);
         }
         void destroy_display_findLobby() {
             this.Controls.Remove(lobby_list);
@@ -224,11 +238,17 @@ namespace ReversiClient
         void menu_btn_find_lobby_Click(object sender, EventArgs e) {
             destroy_display_menu();
             init_display_findLobby();
+            gameNet.beacon_receiving();
         }
 
         void btn_cancel_wait_conn_Click(object sender, EventArgs e) {
             destroy_display_waitConn();
             gameNet.send_beacon(false);
+            init_display_menu();
+        }
+        void btn_cancel_find_lobby_Click(object sender, EventArgs e) {
+            destroy_display_findLobby();
+            gameNet.beacon_receiving_stop();
             init_display_menu();
         }
 

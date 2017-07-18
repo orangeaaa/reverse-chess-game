@@ -11,11 +11,18 @@ namespace ReversiClient {
     class comm : IDisposable {
 
         const int game_port = 10000;
+        const string beacon_msg = "ReversiClient";
 
         Timer bcn_tm = new Timer();
 
         UdpClient cli = new UdpClient();
         IPEndPoint bcn_ip = new IPEndPoint(IPAddress.Broadcast, game_port);
+
+        UdpClient cli_bcn_rcv;
+        IPEndPoint bcn_rcv_ip = new IPEndPoint(IPAddress.Any, game_port);
+        private System.Threading.Thread t_bcn_rcv;
+        private bool t_bcn_rcv_exit;
+        private Object bcn_rcv_lock = new object();
 
         public comm() {
             bcn_tm.Elapsed += new ElapsedEventHandler(beaconEvent);
@@ -24,14 +31,50 @@ namespace ReversiClient {
         }
         public void Dispose() {
             cli.Close();
+            cli_bcn_rcv.Close();
         }
 
+        // Beacon frame
         public void send_beacon(bool send = true) {
             bcn_tm.Enabled = send;
         }
         void beaconEvent(object source, ElapsedEventArgs e) {
-            byte[] bytes = Encoding.ASCII.GetBytes("ReversiClient");
+            byte[] bytes = Encoding.ASCII.GetBytes(beacon_msg);
             cli.Send(bytes, bytes.Length, bcn_ip);
+        }
+
+        // Receiving beacon
+        public void beacon_receiving() {
+            cli_bcn_rcv = new UdpClient();
+            cli_bcn_rcv.Client.Bind(bcn_rcv_ip);
+            t_bcn_rcv_exit = false;
+            t_bcn_rcv = new System.Threading.Thread(beacon_receiving_action);
+            t_bcn_rcv.IsBackground = true;
+            t_bcn_rcv.Start();
+        }
+        public void beacon_receiving_stop() {
+            cli_bcn_rcv.Close();
+            t_bcn_rcv_exit = true;
+        }
+        private void beacon_receiving_action() {
+            while (!t_bcn_rcv_exit) {
+                //System.Diagnostics.Debug.WriteLine("Sniffing...");
+                try {
+                    byte[] rcv_bytes = cli_bcn_rcv.Receive(ref bcn_rcv_ip);
+                    string rcv_data = Encoding.ASCII.GetString(rcv_bytes);
+                    if (rcv_data == beacon_msg) {
+                        System.Diagnostics.Debug.WriteLine("Beacon received.");
+                        System.Diagnostics.Debug.WriteLine("From " + bcn_rcv_ip.Address.ToString());
+
+                        lock (bcn_rcv_lock) {
+                        }
+                    }
+                }
+                catch (System.Net.Sockets.SocketException) {
+                    // continue
+                }
+            }
+            //System.Diagnostics.Debug.WriteLine("Beacon receiving ended.");
         }
 
 
