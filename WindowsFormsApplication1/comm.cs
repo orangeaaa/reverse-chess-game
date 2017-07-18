@@ -23,6 +23,7 @@ namespace ReversiClient {
         private System.Threading.Thread t_bcn_rcv;
         private bool t_bcn_rcv_exit;
         private Object bcn_rcv_lock = new object();
+        public List<Tuple<IPAddress, long>> host_list = new List<Tuple<IPAddress, long>>(); // Host ip and current time
 
         public comm() {
             bcn_tm.Elapsed += new ElapsedEventHandler(beaconEvent);
@@ -58,15 +59,18 @@ namespace ReversiClient {
         }
         private void beacon_receiving_action() {
             while (!t_bcn_rcv_exit) {
-                //System.Diagnostics.Debug.WriteLine("Sniffing...");
                 try {
+                    System.Diagnostics.Debug.WriteLine("Sniffing...");
                     byte[] rcv_bytes = cli_bcn_rcv.Receive(ref bcn_rcv_ip);
                     string rcv_data = Encoding.ASCII.GetString(rcv_bytes);
+                    System.Diagnostics.Debug.WriteLine(rcv_data);
                     if (rcv_data == beacon_msg) {
                         System.Diagnostics.Debug.WriteLine("Beacon received.");
                         System.Diagnostics.Debug.WriteLine("From " + bcn_rcv_ip.Address.ToString());
+                        
 
                         lock (bcn_rcv_lock) {
+                            host_list.Add(new Tuple<IPAddress, long>(bcn_rcv_ip.Address, DateTime.UtcNow.Ticks));
                         }
                     }
                 }

@@ -182,6 +182,35 @@ namespace ReversiClient
             }
         }
 
+        void menu_btn_single_Click(object sender, EventArgs e) {
+            destroy_display_menu();
+            init_display_board();
+            board.game_start();
+            ready_for_next_play();
+        }
+        void menu_btn_create_lobby_Click(object sender, EventArgs e) {
+            destroy_display_menu();
+            gameNet.send_beacon();
+            init_display_waitConn();
+        }
+        void menu_btn_find_lobby_Click(object sender, EventArgs e) {
+            destroy_display_menu();
+            init_display_findLobby();
+            gameNet.beacon_receiving();
+        }
+
+        void btn_cancel_wait_conn_Click(object sender, EventArgs e) {
+            destroy_display_waitConn();
+            gameNet.send_beacon(false);
+            init_display_menu();
+        }
+        void btn_cancel_find_lobby_Click(object sender, EventArgs e) {
+            destroy_display_findLobby();
+            gameNet.beacon_receiving_stop();
+            init_display_menu();
+        }
+
+
         void update_btn(int x, int y, bool can_click = false)
         {
             switch (board.status[x, y])
@@ -224,33 +253,6 @@ namespace ReversiClient
             }
         }
 
-        void menu_btn_single_Click(object sender, EventArgs e) {
-            destroy_display_menu();
-            init_display_board();
-            board.game_start();
-            ready_for_next_play();
-        }
-        void menu_btn_create_lobby_Click(object sender, EventArgs e) {
-            destroy_display_menu();
-            gameNet.send_beacon();
-            init_display_waitConn();
-        }
-        void menu_btn_find_lobby_Click(object sender, EventArgs e) {
-            destroy_display_menu();
-            init_display_findLobby();
-            gameNet.beacon_receiving();
-        }
-
-        void btn_cancel_wait_conn_Click(object sender, EventArgs e) {
-            destroy_display_waitConn();
-            gameNet.send_beacon(false);
-            init_display_menu();
-        }
-        void btn_cancel_find_lobby_Click(object sender, EventArgs e) {
-            destroy_display_findLobby();
-            gameNet.beacon_receiving_stop();
-            init_display_menu();
-        }
 
         void btn_Click(object sender,EventArgs e)
         {
