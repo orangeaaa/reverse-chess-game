@@ -113,7 +113,6 @@ namespace ReversiClient
             };
             this.Controls.Add(pic_waiting_conn);
         }
-
         void destroy_display_waitConn() {
             this.Controls.Remove(waiting_conn);
             waiting_conn.Dispose();
@@ -146,6 +145,7 @@ namespace ReversiClient
                 Size = new Size(300, 50),
                 Text = "Join"
             };
+            btn_join_lobby.Click += menu_btn_join_lobby_Click;
             this.Controls.Add(btn_join_lobby);
         }
         void destroy_display_findLobby() {
@@ -217,16 +217,22 @@ namespace ReversiClient
             gameNet.send_beacon();
             init_display_waitConn();
         }
+        void btn_cancel_wait_conn_Click(object sender, EventArgs e) {
+            destroy_display_waitConn();
+            gameNet.send_beacon(false);
+            init_display_menu();
+        }
+
         void menu_btn_find_lobby_Click(object sender, EventArgs e) {
             destroy_display_menu();
             init_display_findLobby();
             gameNet.beacon_receiving();
         }
-
-        void btn_cancel_wait_conn_Click(object sender, EventArgs e) {
-            destroy_display_waitConn();
-            gameNet.send_beacon(false);
-            init_display_menu();
+        void menu_btn_join_lobby_Click(object sender, EventArgs e) {
+            if (lobby_list.SelectedItem == null) {
+                System.Diagnostics.Debug.WriteLine("No item selected.");
+                return;
+            }
         }
         void btn_cancel_find_lobby_Click(object sender, EventArgs e) {
             destroy_display_findLobby();
