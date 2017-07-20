@@ -160,7 +160,10 @@ namespace ReversiClient
             this.Controls.Remove(btn_join_lobby);
             btn_join_lobby.Dispose();
         }
-        void lobby_update_event(object source, System.Timers.ElapsedEventArgs e) {
+        void lobby_list_update_event(object source, ListChangeEventArgs e) {
+            lobby_list.Items.Add(e.ip.Address.ToString());
+        }
+        void lobby_list_initialize() {
 
         }
 

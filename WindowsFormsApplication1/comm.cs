@@ -65,7 +65,7 @@ namespace ReversiClient {
                     System.Diagnostics.Debug.WriteLine(rcv_data);
                     if (rcv_data == beacon_msg) {
                         System.Diagnostics.Debug.WriteLine("Beacon received from " + bcn_rcv_ip.Address.ToString());
-                        LobbyList.add_ip_to_list(bcn_rcv_ip.Address);
+                        LobbyList.add_ip_to_list(bcn_rcv_ip);
                     }
                 }
                 catch (System.Net.Sockets.SocketException) {
@@ -79,8 +79,8 @@ namespace ReversiClient {
     internal class comm_lobby_list {
         private const int item_lifespan = 5000;
         private Object list_lock = new object();
-        public List<Tuple<IPAddress, long, Timer>> host_list = new List<Tuple<IPAddress, long, Timer>>(); // Host ip and current time
-        public List<Tuple<IPAddress, long, Timer>> HostList {
+        public List<Tuple<IPEndPoint, long, Timer>> host_list = new List<Tuple<IPEndPoint, long, Timer>>(); // Host ip and current time
+        public List<Tuple<IPEndPoint, long, Timer>> HostList {
             get {
                 lock (list_lock) {
                     return this.host_list;
@@ -88,22 +88,22 @@ namespace ReversiClient {
             }
         }
 
-        public void add_ip_to_list(IPAddress some_ip) {
+        public void add_ip_to_list(IPEndPoint some_ip) {
             bool something_to_add = false;
             lock (list_lock) {
-                int existing_item_index = host_list.FindIndex(each_ip => each_ip.Item1.Equals(some_ip));
+                int existing_item_index = host_list.FindIndex(each_ip => each_ip.Item1.Address.Equals(some_ip));
                 if (existing_item_index >= 0) {
                     Timer item_expire = host_list[existing_item_index].Item3;
                     item_expire.Stop();
                     item_expire.Start();
-                    host_list[existing_item_index] = new Tuple<IPAddress, long, Timer>(some_ip, DateTime.UtcNow.Ticks, item_expire);
+                    host_list[existing_item_index] = new Tuple<IPEndPoint, long, Timer>(some_ip, DateTime.UtcNow.Ticks, item_expire);
                 }
                 else {
                     Timer item_expire = new Timer();
                     item_expire.Elapsed += list_item_expire;
                     item_expire.Interval = item_lifespan;
                     item_expire.Enabled = true;
-                    host_list.Add(new Tuple<IPAddress, long, Timer>(some_ip, DateTime.UtcNow.Ticks, item_expire));
+                    host_list.Add(new Tuple<IPEndPoint, long, Timer>(some_ip, DateTime.UtcNow.Ticks, item_expire));
                     something_to_add = true;
                 }
             }
@@ -117,7 +117,7 @@ namespace ReversiClient {
         private void list_item_expire(object source, ElapsedEventArgs e) {
             bool something_to_remove = false;
             int existing_item_index;
-            IPAddress ip_to_remove = null;
+            IPEndPoint ip_to_remove = null;
             lock (list_lock) {
                 existing_item_index = host_list.FindIndex(each_ip => each_ip.Item3 == (Timer)source);
                 if (existing_item_index >= 0) {
@@ -146,6 +146,6 @@ namespace ReversiClient {
     }
     internal class ListChangeEventArgs : EventArgs {
         public int mode { get; set; } // 1: add, 2: remove
-        public IPAddress ip { get; set; }
+        public IPEndPoint ip { get; set; }
     }
 }
