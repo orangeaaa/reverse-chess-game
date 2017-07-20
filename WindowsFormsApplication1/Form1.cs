@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using ReversiClient.network;
+
 namespace ReversiClient
 {
     public partial class Form1 : Form

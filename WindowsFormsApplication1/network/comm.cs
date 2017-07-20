@@ -7,8 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace ReversiClient {
-    class comm : IDisposable {
+namespace ReversiClient.network {
+    partial class comm : IDisposable {
 
         const int game_port = 10000;
         const string beacon_msg = "ReversiClient";
