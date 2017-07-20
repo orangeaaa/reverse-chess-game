@@ -17,10 +17,6 @@ namespace ReversiClient
             InitializeComponent();
             btn = new Button[board.N, board.N];
             gameNet = new comm();
-
-            lobby_update_tm.Elapsed += new System.Timers.ElapsedEventHandler(lobby_update_event);
-            lobby_update_tm.Interval = 2500;
-            lobby_update_tm.Enabled = false;
         }
         reversi_board board = new reversi_board();
         comm gameNet;
@@ -40,7 +36,6 @@ namespace ReversiClient
         ListBox lobby_list;
         Button cancel_finding_lobby,
             btn_join_lobby;
-        System.Timers.Timer lobby_update_tm = new System.Timers.Timer();
 
         private int square_size = 60;
         private int margin = 50;
@@ -134,7 +129,9 @@ namespace ReversiClient
                 Size = new Size(300, 200),
                 SelectionMode = SelectionMode.One
             };
+            lobby_list_initialize();
             this.Controls.Add(lobby_list);
+            gameNet.LobbyList.RaiseListChangeEvent += lobby_list_update_event;
 
             cancel_finding_lobby = new Button() {
                 Location = new Point(50, 300),
@@ -153,6 +150,7 @@ namespace ReversiClient
             this.Controls.Add(btn_join_lobby);
         }
         void destroy_display_findLobby() {
+            gameNet.LobbyList.RaiseListChangeEvent -= lobby_list_update_event;
             this.Controls.Remove(lobby_list);
             lobby_list.Dispose();
             this.Controls.Remove(cancel_finding_lobby);
@@ -161,10 +159,19 @@ namespace ReversiClient
             btn_join_lobby.Dispose();
         }
         void lobby_list_update_event(object source, ListChangeEventArgs e) {
-            lobby_list.Items.Add(e.ip.Address.ToString());
+            string content = e.ip.Address.ToString();
+            if (e.mode == 1) {
+                lobby_list.Items.Add(content);
+            }
+            else if (e.mode == 2) {
+                if (lobby_list.Items.Contains(content))
+                    lobby_list.Items.Remove(content);
+            }
         }
         void lobby_list_initialize() {
-
+            foreach(var item in gameNet.LobbyList.HostList) {
+                lobby_list.Items.Add(item.Item1.Address.ToString());
+            }
         }
 
         void init_display_board() {

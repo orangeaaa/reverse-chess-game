@@ -22,7 +22,7 @@ namespace ReversiClient {
         IPEndPoint bcn_rcv_ip = new IPEndPoint(IPAddress.Any, game_port);
         private System.Threading.Thread t_bcn_rcv;
         private bool t_bcn_rcv_exit;
-        comm_lobby_list LobbyList = new comm_lobby_list();
+        public comm_lobby_list LobbyList = new comm_lobby_list();
 
         public comm() {
             bcn_tm.Elapsed += new ElapsedEventHandler(beaconEvent);
