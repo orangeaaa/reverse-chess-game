@@ -144,8 +144,7 @@ namespace ReversiClient
             btn_join_lobby = new Button() {
                 Location = new Point(50, 250),
                 Size = new Size(300, 50),
-                Text = "Join",
-                Enabled = false
+                Text = "Join"
             };
             this.Controls.Add(btn_join_lobby);
         }
