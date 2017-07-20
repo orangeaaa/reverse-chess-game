@@ -169,6 +169,7 @@ namespace ReversiClient
             }
         }
         void lobby_list_initialize() {
+            lobby_list.Items.Clear();
             foreach(var item in gameNet.LobbyList.HostList) {
                 lobby_list.Items.Add(item.Item1.Address.ToString());
             }
