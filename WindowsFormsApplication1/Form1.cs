@@ -17,6 +17,10 @@ namespace ReversiClient
             InitializeComponent();
             btn = new Button[board.N, board.N];
             gameNet = new comm();
+
+            lobby_update_tm.Elapsed += new System.Timers.ElapsedEventHandler(lobby_update_event);
+            lobby_update_tm.Interval = 2500;
+            lobby_update_tm.Enabled = false;
         }
         reversi_board board = new reversi_board();
         comm gameNet;
@@ -36,6 +40,7 @@ namespace ReversiClient
         ListBox lobby_list;
         Button cancel_finding_lobby,
             btn_join_lobby;
+        System.Timers.Timer lobby_update_tm = new System.Timers.Timer();
 
         private int square_size = 60;
         private int margin = 50;
@@ -130,6 +135,7 @@ namespace ReversiClient
                 SelectionMode = SelectionMode.One
             };
             this.Controls.Add(lobby_list);
+
             cancel_finding_lobby = new Button() {
                 Location = new Point(50, 300),
                 Size = new Size(300, 50),
@@ -137,6 +143,7 @@ namespace ReversiClient
             };
             cancel_finding_lobby.Click += btn_cancel_find_lobby_Click;
             this.Controls.Add(cancel_finding_lobby);
+
             btn_join_lobby = new Button() {
                 Location = new Point(50, 250),
                 Size = new Size(300, 50),
@@ -152,6 +159,9 @@ namespace ReversiClient
             cancel_finding_lobby.Dispose();
             this.Controls.Remove(btn_join_lobby);
             btn_join_lobby.Dispose();
+        }
+        void lobby_update_event(object source, System.Timers.ElapsedEventArgs e) {
+
         }
 
         void init_display_board() {

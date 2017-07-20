@@ -22,8 +22,7 @@ namespace ReversiClient {
         IPEndPoint bcn_rcv_ip = new IPEndPoint(IPAddress.Any, game_port);
         private System.Threading.Thread t_bcn_rcv;
         private bool t_bcn_rcv_exit;
-        private Object bcn_rcv_lock = new object();
-        public List<Tuple<IPAddress, long>> host_list = new List<Tuple<IPAddress, long>>(); // Host ip and current time
+        comm_lobby_list LobbyList = new comm_lobby_list();
 
         public comm() {
             bcn_tm.Elapsed += new ElapsedEventHandler(beaconEvent);
@@ -65,13 +64,8 @@ namespace ReversiClient {
                     string rcv_data = Encoding.ASCII.GetString(rcv_bytes);
                     System.Diagnostics.Debug.WriteLine(rcv_data);
                     if (rcv_data == beacon_msg) {
-                        System.Diagnostics.Debug.WriteLine("Beacon received.");
-                        System.Diagnostics.Debug.WriteLine("From " + bcn_rcv_ip.Address.ToString());
-                        
-
-                        lock (bcn_rcv_lock) {
-                            host_list.Add(new Tuple<IPAddress, long>(bcn_rcv_ip.Address, DateTime.UtcNow.Ticks));
-                        }
+                        System.Diagnostics.Debug.WriteLine("Beacon received from " + bcn_rcv_ip.Address.ToString());
+                        LobbyList.add_ip_to_list(bcn_rcv_ip.Address);
                     }
                 }
                 catch (System.Net.Sockets.SocketException) {
@@ -80,7 +74,43 @@ namespace ReversiClient {
             }
             //System.Diagnostics.Debug.WriteLine("Beacon receiving ended.");
         }
+    }
 
+    internal class comm_lobby_list {
+        private const int item_lifespan = 5000;
+        private Object list_lock = new object();
+        public List<Tuple<IPAddress, long, Timer>> host_list = new List<Tuple<IPAddress, long, Timer>>(); // Host ip and current time
 
+        public void add_ip_to_list(IPAddress some_ip) {
+            bool something_to_add = false;
+            lock (list_lock) {
+                int existing_item_index = host_list.FindIndex(each_ip => each_ip.Item1.Equals(some_ip));
+                if (existing_item_index >= 0) {
+                    Timer item_expire = host_list[existing_item_index].Item3;
+                    item_expire.Stop();
+                    item_expire.Start();
+                    host_list[existing_item_index] = new Tuple<IPAddress, long, Timer>(some_ip, DateTime.UtcNow.Ticks, item_expire);
+                }
+                else {
+                    Timer item_expire = new Timer();
+                    item_expire.Elapsed += list_item_expire;
+                    item_expire.Interval = item_lifespan;
+                    item_expire.Enabled = true;
+                    host_list.Add(new Tuple<IPAddress, long, Timer>(some_ip, DateTime.UtcNow.Ticks, item_expire));
+                    something_to_add = true;
+                }
+            }
+        }
+        private void list_item_expire(object source, ElapsedEventArgs e) {
+            bool something_to_remove = false;
+            lock (list_lock) {
+                int existing_item_index = host_list.FindIndex(each_ip => each_ip.Item3 == (Timer)source);
+                if (existing_item_index >= 0) {
+                    host_list[existing_item_index].Item3.Dispose();
+                    host_list.RemoveAt(existing_item_index);
+                    something_to_remove = true;
+                }
+            }
+        }
     }
 }
