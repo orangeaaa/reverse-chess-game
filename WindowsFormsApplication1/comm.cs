@@ -19,7 +19,7 @@ namespace ReversiClient {
         IPEndPoint bcn_ip = new IPEndPoint(IPAddress.Broadcast, game_port);
 
         UdpClient cli_bcn_rcv;
-        IPEndPoint bcn_rcv_ip = new IPEndPoint(IPAddress.Any, game_port);
+        IPEndPoint bcn_rcv_ip = null;
         private System.Threading.Thread t_bcn_rcv;
         private bool t_bcn_rcv_exit;
         public comm_lobby_list LobbyList = new comm_lobby_list();
@@ -45,6 +45,7 @@ namespace ReversiClient {
 
         // Receiving beacon
         public void beacon_receiving() {
+            bcn_rcv_ip = new IPEndPoint(IPAddress.Any, game_port);
             cli_bcn_rcv = new UdpClient();
             cli_bcn_rcv.Client.Bind(bcn_rcv_ip);
             t_bcn_rcv_exit = false;
@@ -59,13 +60,14 @@ namespace ReversiClient {
         private void beacon_receiving_action() {
             while (!t_bcn_rcv_exit) {
                 try {
-                    System.Diagnostics.Debug.WriteLine("Sniffing...");
-                    byte[] rcv_bytes = cli_bcn_rcv.Receive(ref bcn_rcv_ip);
+                    IPEndPoint bcn_sender_ip = new IPEndPoint(IPAddress.Any, game_port);
+                    //System.Diagnostics.Debug.WriteLine("Sniffing...");
+                    byte[] rcv_bytes = cli_bcn_rcv.Receive(ref bcn_sender_ip);
                     string rcv_data = Encoding.ASCII.GetString(rcv_bytes);
-                    System.Diagnostics.Debug.WriteLine(rcv_data);
+                    //System.Diagnostics.Debug.WriteLine(rcv_data);
                     if (rcv_data == beacon_msg) {
-                        System.Diagnostics.Debug.WriteLine("Beacon received from " + bcn_rcv_ip.Address.ToString());
-                        LobbyList.add_ip_to_list(bcn_rcv_ip);
+                        System.Diagnostics.Debug.WriteLine("Beacon received from " + bcn_sender_ip.Address.ToString());
+                        LobbyList.add_ip_to_list(bcn_sender_ip);
                     }
                 }
                 catch (System.Net.Sockets.SocketException) {
@@ -91,7 +93,7 @@ namespace ReversiClient {
         public void add_ip_to_list(IPEndPoint some_ip) {
             bool something_to_add = false;
             lock (list_lock) {
-                int existing_item_index = host_list.FindIndex(each_ip => each_ip.Item1.Address.Equals(some_ip));
+                int existing_item_index = host_list.FindIndex(each_ip => each_ip.Item1.Address.Equals(some_ip.Address));
                 if (existing_item_index >= 0) {
                     Timer item_expire = host_list[existing_item_index].Item3;
                     item_expire.Stop();

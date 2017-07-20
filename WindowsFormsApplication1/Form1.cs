@@ -159,6 +159,10 @@ namespace ReversiClient
             btn_join_lobby.Dispose();
         }
         void lobby_list_update_event(object source, ListChangeEventArgs e) {
+            if (InvokeRequired) {
+                Invoke(new Action<object, ListChangeEventArgs>(lobby_list_update_event), source, e);
+                return;
+            }
             string content = e.ip.Address.ToString();
             if (e.mode == 1) {
                 lobby_list.Items.Add(content);
