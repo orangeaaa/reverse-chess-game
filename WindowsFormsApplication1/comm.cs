@@ -80,6 +80,13 @@ namespace ReversiClient {
         private const int item_lifespan = 5000;
         private Object list_lock = new object();
         public List<Tuple<IPAddress, long, Timer>> host_list = new List<Tuple<IPAddress, long, Timer>>(); // Host ip and current time
+        public List<Tuple<IPAddress, long, Timer>> HostList {
+            get {
+                lock (list_lock) {
+                    return this.host_list;
+                }
+            }
+        }
 
         public void add_ip_to_list(IPAddress some_ip) {
             bool something_to_add = false;
@@ -100,17 +107,45 @@ namespace ReversiClient {
                     something_to_add = true;
                 }
             }
+            if (something_to_add) {
+                ListChangeEventArgs args = new ListChangeEventArgs();
+                args.ip = some_ip;
+                args.mode = 1;
+                OnListChange(args);
+            }
         }
         private void list_item_expire(object source, ElapsedEventArgs e) {
             bool something_to_remove = false;
+            int existing_item_index;
+            IPAddress ip_to_remove = null;
             lock (list_lock) {
-                int existing_item_index = host_list.FindIndex(each_ip => each_ip.Item3 == (Timer)source);
+                existing_item_index = host_list.FindIndex(each_ip => each_ip.Item3 == (Timer)source);
                 if (existing_item_index >= 0) {
                     host_list[existing_item_index].Item3.Dispose();
+                    ip_to_remove = host_list[existing_item_index].Item1;
                     host_list.RemoveAt(existing_item_index);
                     something_to_remove = true;
                 }
             }
+            if (something_to_remove) {
+                ListChangeEventArgs args = new ListChangeEventArgs();
+                args.ip = ip_to_remove;
+                args.mode = 2;
+                OnListChange(args);
+            }
         }
+
+        public event EventHandler<ListChangeEventArgs> RaiseListChangeEvent;
+
+        protected void OnListChange(ListChangeEventArgs e) {
+            EventHandler<ListChangeEventArgs> handler = RaiseListChangeEvent;
+            if (handler != null) {
+                handler(this, e);
+            }
+        }
+    }
+    internal class ListChangeEventArgs : EventArgs {
+        public int mode { get; set; } // 1: add, 2: remove
+        public IPAddress ip { get; set; }
     }
 }
