@@ -123,6 +123,8 @@ namespace ReversiClient
             cancel_waiting_conn.Dispose();
             this.Controls.Remove(pic_waiting_conn);
             pic_waiting_conn.Dispose();
+            // For connecting to game server
+            gameNet.RaiseGameClientConnectEvent -= conn_srv_result_event;
         }
 
         void init_display_findLobby() {
@@ -208,6 +210,22 @@ namespace ReversiClient
                 Image = Image.FromStream(file)
             };
             this.Controls.Add(pic_waiting_conn);
+
+            gameNet.RaiseGameClientConnectEvent += conn_srv_result_event;
+
+        }
+        void conn_srv_result_event(object source,GameClientConnectEventArgs e) {
+            if (InvokeRequired) {
+                Invoke(new Action<object, GameClientConnectEventArgs>(conn_srv_result_event), source, e);
+                return;
+            }
+            if (e.result == 0) {
+                // TODO: connection successful
+            }
+            else {
+                waiting_conn.Text = "Connection failed.";
+                pic_waiting_conn.Visible = false;
+            }
         }
 
 
@@ -239,6 +257,7 @@ namespace ReversiClient
             }
         }
 
+        // Button reactions below
         void menu_btn_single_Click(object sender, EventArgs e) {
             destroy_display_menu();
             init_display_board();
@@ -278,12 +297,7 @@ namespace ReversiClient
             if (ip_valid) {
                 destroy_display_findLobby();
                 init_display_waitConn_srv();
-                try {
-                    gameNet.game_cli_connect(ip_to_connect);
-                }
-                catch (TimeoutException) {
-                    waiting_conn.Text = "Connection failed.";
-                }
+                gameNet.game_cli_connect(ip_to_connect);
             }
         }
         void btn_cancel_find_lobby_Click(object sender, EventArgs e) {
@@ -293,6 +307,7 @@ namespace ReversiClient
         }
 
         void btn_cancel_conn_srv_Click(object sender,EventArgs e) {
+            gameNet.game_cli_connect_stop();
             destroy_display_waitConn();
             init_display_findLobby();
         }

@@ -11,12 +11,52 @@ namespace ReversiClient.network
     {
         // Client side
         TcpClient game_cli;
-        public void game_cli_connect(string what_ip) { // TODO: Need revising
+        string server_ip;
+        System.Threading.Thread t_game_cli_conn;
+        public event EventHandler<GameClientConnectEventArgs> RaiseGameClientConnectEvent;
+
+
+        public void game_cli_connect(string what_ip) {
+            server_ip = what_ip;
             game_cli = new TcpClient();
-            if (!game_cli.ConnectAsync(what_ip, game_port).Wait(3000)) {
-                throw new TimeoutException();
+            t_game_cli_conn = new System.Threading.Thread(game_cli_connect_act);
+            t_game_cli_conn.IsBackground = true;
+            t_game_cli_conn.Start();
+        }
+        public void game_cli_connect_stop() {
+            game_cli.Close();
+        }
+        protected void game_cli_connect_act() {
+            bool success = true;
+            try {
+                if (!game_cli.ConnectAsync(server_ip, game_port).Wait(3000)) {
+                    throw new TimeoutException();
+                }
+            }
+            catch(TimeoutException) {
+                success = false;
+                GameClientConnectEventArgs args = new GameClientConnectEventArgs() { result = 1 };
+                OnGameClientConnect(args);
+            }
+            catch(AggregateException) {
+                success = false;
+                // Probably closed connection.
+                // Do nothing
+            }
+            if (success) {
+                GameClientConnectEventArgs args = new GameClientConnectEventArgs() { result = 0 };
+                OnGameClientConnect(args);
             }
         }
+        protected void OnGameClientConnect(GameClientConnectEventArgs e) {
+            EventHandler<GameClientConnectEventArgs> handler = RaiseGameClientConnectEvent;
+            if (handler != null) {
+                handler(this, e);
+            }
+        }
+    }
+    internal class GameClientConnectEventArgs : EventArgs {
+        public int result { get; set; } // 0: success 1: fail
     }
 
     abstract class rgp { // Reversi Game Protocol
