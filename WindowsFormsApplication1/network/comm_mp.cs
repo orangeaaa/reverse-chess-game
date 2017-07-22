@@ -11,6 +11,12 @@ namespace ReversiClient.network
     {
         // Client side
         TcpClient game_cli;
+        public void game_cli_connect(string what_ip) { // TODO: Need revising
+            game_cli = new TcpClient();
+            if (!game_cli.ConnectAsync(what_ip, game_port).Wait(3000)) {
+                throw new TimeoutException();
+            }
+        }
     }
 
     abstract class rgp { // Reversi Game Protocol

@@ -30,7 +30,7 @@ namespace ReversiClient
         Button menu_btn_single,
             menu_btn_create_lobby,
             menu_btn_find_lobby;
-        // waiting for connection
+        // waiting for connection (server and client)
         Label waiting_conn;
         Button cancel_waiting_conn;
         PictureBox pic_waiting_conn;
@@ -38,6 +38,7 @@ namespace ReversiClient
         ListBox lobby_list;
         Button cancel_finding_lobby,
             btn_join_lobby;
+        string ip_to_connect;
 
         private int square_size = 60;
         private int margin = 50;
@@ -180,6 +181,36 @@ namespace ReversiClient
             }
         }
 
+        void init_display_waitConn_srv() {
+            // retain menu window settings
+
+            waiting_conn = new Label() {
+                Location = new Point(0, 200),
+                Size = new Size(400, 50),
+                Text = "Connecting to rival...",
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+            this.Controls.Add(waiting_conn);
+
+            cancel_waiting_conn = new Button() {
+                Location = new Point(50, 300),
+                Size = new Size(300, 50),
+                Text = "Cancel"
+            };
+            cancel_waiting_conn.Click += btn_cancel_conn_srv_Click;
+            this.Controls.Add(cancel_waiting_conn);
+
+            var thisExe = System.Reflection.Assembly.GetExecutingAssembly();
+            var file = thisExe.GetManifestResourceStream("ReversiClient.w8loader.gif");
+            pic_waiting_conn = new PictureBox() {
+                Location = new Point(175, 150),
+                Size = new Size(50, 50),
+                Image = Image.FromStream(file)
+            };
+            this.Controls.Add(pic_waiting_conn);
+        }
+
+
         void init_display_board() {
             Size size = new Size(margin * 2 + square_size * board.N, margin * 2 + square_size * board.N);
             this.ClientSize = size;
@@ -235,11 +266,35 @@ namespace ReversiClient
                 System.Diagnostics.Debug.WriteLine("No item selected.");
                 return;
             }
+            // Find ip endpoint in stored list
+            bool ip_valid = false;
+            foreach(var item in gameNet.LobbyList.HostList) {
+                if (item.Item1.Address.ToString().Equals(lobby_list.SelectedItem.ToString())) {
+                    ip_to_connect = item.Item1.Address.ToString();
+                    ip_valid = true;
+                    break;
+                }
+            }
+            if (ip_valid) {
+                destroy_display_findLobby();
+                init_display_waitConn_srv();
+                try {
+                    gameNet.game_cli_connect(ip_to_connect);
+                }
+                catch (TimeoutException) {
+                    waiting_conn.Text = "Connection failed.";
+                }
+            }
         }
         void btn_cancel_find_lobby_Click(object sender, EventArgs e) {
             destroy_display_findLobby();
             gameNet.beacon_receiving_stop();
             init_display_menu();
+        }
+
+        void btn_cancel_conn_srv_Click(object sender,EventArgs e) {
+            destroy_display_waitConn();
+            init_display_findLobby();
         }
 
 
