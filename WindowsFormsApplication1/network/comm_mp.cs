@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ReversiClient.network
 {
-    partial class comm:IDisposable
-    {
+    partial class comm : IDisposable {
         // Client side
         TcpClient game_cli;
         string server_ip;
         System.Threading.Thread t_game_cli_conn;
         public event EventHandler<GameClientConnectEventArgs> RaiseGameClientConnectEvent;
-
 
         public void game_cli_connect(string what_ip) {
             server_ip = what_ip;
@@ -33,12 +32,12 @@ namespace ReversiClient.network
                     throw new TimeoutException();
                 }
             }
-            catch(TimeoutException) {
+            catch (TimeoutException) {
                 success = false;
                 GameClientConnectEventArgs args = new GameClientConnectEventArgs() { result = 1 };
                 OnGameClientConnect(args);
             }
-            catch(AggregateException) {
+            catch (AggregateException) {
                 success = false;
                 // Probably closed connection.
                 // Do nothing
@@ -54,7 +53,35 @@ namespace ReversiClient.network
                 handler(this, e);
             }
         }
+
+        // Server side
+        TcpListener game_srv;
+        System.Threading.Thread t_game_srv_listen;
+        TcpClient game_srv_cli;
+        public void game_srv_listen() {
+            t_game_srv_listen = new System.Threading.Thread(game_srv_listen_act);
+            t_game_srv_listen.IsBackground = true;
+            t_game_srv_listen.Start();
+        }
+        public void game_srv_listen_stop() {
+            game_srv.Stop();
+        }
+        void game_srv_listen_act() {
+            game_srv = new TcpListener(IPAddress.Any, game_port);
+            game_srv.Start();
+            try {
+                game_srv_cli = game_srv.AcceptTcpClient();
+            }
+            catch (SocketException) {
+                // The connection has been canceled.
+                return;
+            }
+            // Connected
+            game_srv.Stop();
+
+        }
     }
+
     internal class GameClientConnectEventArgs : EventArgs {
         public int result { get; set; } // 0: success 1: fail
     }

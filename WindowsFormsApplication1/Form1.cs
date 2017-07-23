@@ -267,11 +267,13 @@ namespace ReversiClient
         void menu_btn_create_lobby_Click(object sender, EventArgs e) {
             destroy_display_menu();
             gameNet.send_beacon();
+            gameNet.game_srv_listen();
             init_display_waitConn();
         }
         void btn_cancel_wait_conn_Click(object sender, EventArgs e) {
             destroy_display_waitConn();
             gameNet.send_beacon(false);
+            gameNet.game_srv_listen_stop();
             init_display_menu();
         }
 
