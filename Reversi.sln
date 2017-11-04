@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReversiClient", "WindowsFormsApplication1\ReversiClient.csproj", "{6E8C9307-67E2-4230-8F7B-2416E871EA27}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReversiClient", "client\ReversiClient.csproj", "{6E8C9307-67E2-4230-8F7B-2416E871EA27}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
