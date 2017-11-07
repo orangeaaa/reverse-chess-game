@@ -8,6 +8,7 @@ Defines the chess board.
 #ifndef _board_h
 #define _board_h
 
+#include <algorithm>
 #include <vector>
 
 #include "piece.h"
@@ -23,8 +24,25 @@ namespace game{
 		const size_t w;
 		const size_t h;
 
-		size_t numPieces()const { return _pieces.size(); }
+		// piece status query (used in count_if)
+		static bool isPieceAlive(Piece* piece) { return piece -> isAlive(); }
+		static bool isPieceInitialized(Piece* piece) { return piece -> isInitialized(); }
 
+		// useful statistics
+		size_t numPieces() const { return _pieces.size(); }
+		size_t numPiecesAlive() const { return std::count_if(_pieces.begin(), _pieces.end(), isPieceAlive); }
+		size_t numPiecesAt(int x, int y) const {
+			if(!_posInBoard(x, y)) return 0;
+			auto occu = &_occupancy[_getX(x)][_getY(y)];
+			return occu -> size();
+		}
+		size_t numPieceAliveAt(int x, int y) const {
+			if(!_posInBoard(x, y)) return 0;
+			auto occu = &_occupancy[_getX(x)][_getY(y)];
+			return std::count_if(occu->begin(), occu->end(), isPieceAlive);
+		}
+
+		// TODO
 		virtual bool canPlace(int x, int y, int type, int owner, int status) { return false; }
 		virtual bool placePiece(int x, int y, int type, int owner, int status) { return false; }
 
@@ -36,10 +54,11 @@ namespace game{
 		int _y0;
 		int _getX(int x)const { return x + _x0; }
 		int _getY(int y)const { return y + _y0; }
-		int _posInBoard(int x, int y){
+		bool _posInBoard(int x, int y) const {
 			return _getX(x) >= 0 && _getX(x) < w && _getY(y) >= 0 && _getY(y) < h;
 		}
 
+		// _occupancy stores the ptrs to pieces at each position
 		std::vector<std::vector<std::vector<Piece*>>> _occupancy;
 		std::vector<Piece*> _pieces;
 	};
