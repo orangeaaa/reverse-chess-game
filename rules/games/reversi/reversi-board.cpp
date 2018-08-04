@@ -20,7 +20,7 @@ bool ReversiBoard::placePiece(int x, int y, int type, int owner, int status){
 
     // Check occupancy
     if(_occupancy[nx][ny].size() >= 1) return false;
-
+    
     // Place piece
     Piece* newPiece = new Piece(numPieces(), nx, ny, type, owner, status);
     _pieces.push_back(newPiece);
